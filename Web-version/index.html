@@ -1,292 +1,111 @@
-<link rel="stylesheet" href="style.css">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Goose Journal</title>
 
-<div class="app" id="app">
-  <div class="toolbar">
-    <div style="position:relative;">
-      <button class="tb-btn" onclick="toggleDD('dd-font',event)">Font <span class="chevron"></span></button>
-      <div class="dropdown" id="dd-font"><div class="dd-label">Typeface</div><div class="font-list" id="font-list"></div></div>
-    </div>
-    <div style="position:relative;">
-      <button class="tb-btn" onclick="toggleDD('dd-size',event)">Size <span class="chevron"></span></button>
-      <div class="dropdown" id="dd-size" style="min-width:110px;"><div class="dd-label">Font size</div><div class="font-list" id="size-list"></div></div>
-    </div>
-    <div class="tb-sep"></div>
-    <div style="position:relative;">
-      <button class="tb-btn" onclick="toggleDD('dd-style',event)">Style <span class="chevron"></span></button>
-      <div class="dropdown" id="dd-style" style="min-width:155px;">
-        <div class="dd-label">Text style</div>
-        <div class="dd-item" id="sty-bold" onclick="applyStyle('bold')"><b>Bold</b></div>
-        <div class="dd-item" id="sty-italic" onclick="applyStyle('italic')"><i>Italic</i></div>
-        <div class="dd-item" id="sty-underline" onclick="applyStyle('underline')"><u>Underline</u></div>
-        <div class="dd-item" id="sty-strikethrough" onclick="applyStyle('strikethrough')"><s>Strikethrough</s></div>
-      </div>
-    </div>
-    <div class="tb-sep"></div>
-    <div style="position:relative;">
-      <button class="tb-btn" onclick="toggleDD('dd-textcolor',event)">Text color <span class="chevron"></span></button>
-      <div class="dropdown" id="dd-textcolor"><div class="dd-label">Font color</div><div class="color-grid" id="cg-text"></div></div>
-    </div>
-    <div style="position:relative;">
-      <button class="tb-btn" onclick="toggleDD('dd-hl',event)">Highlight <span class="chevron"></span></button>
-      <div class="dropdown" id="dd-hl"><div class="dd-label">Highlight color</div><div class="color-grid" id="cg-hl"></div><div class="dd-item" onclick="applyColor('hiliteColor','transparent',null,'cg-hl')">None</div></div>
-    </div>
-    <div style="position:relative;">
-      <button class="tb-btn" onclick="toggleDD('dd-bg',event)">Background <span class="chevron"></span></button>
-      <div class="dropdown" id="dd-bg"><div class="dd-label">Page background</div><div class="color-grid" id="cg-bg"></div></div>
-    </div>
-    <div class="tb-sep"></div>
-    <div style="position:relative;">
-      <button class="tb-btn" onclick="toggleDD('dd-spacing',event)">Spacing <span class="chevron"></span></button>
-      <div class="dropdown" id="dd-spacing" style="min-width:220px;">
-        <div class="dd-label">Line &amp; paragraph spacing</div>
-        <div class="spacing-row"><label>Line height</label><input type="range" min="1.2" max="3.0" step="0.1" value="1.8" oninput="setLineH(this.value)"/><span class="spacing-val" id="lh-val">1.8</span></div>
-        <div class="spacing-row"><label>Paragraph gap</label><input type="range" min="0" max="32" step="2" value="8" oninput="setParaGap(this.value)"/><span class="spacing-val" id="pg-val">8px</span></div>
-      </div>
-    </div>
-    <div class="tb-sep"></div>
-    <button class="tb-btn" style="font-size: 14px;">👜</button>
-    <button class="tb-btn" style="font-size: 14px;">🦢</button>
-    <button class="new-btn" onclick="newEntry()" style="position: absolute; right: 14px; padding: 5px 10px; font-size: 12px;">+ New entry</button>
-  </div>
-
-  <div class="main">
-    <div class="sidebar" id="sidebar">
-      <div class="sb-inner">
-        <div class="sb-top">
-          <button class="sb-cal-btn" onclick="toggleCal(event)">📅</button>
-          <input class="sb-search" id="search-box" placeholder="Search entries…" oninput="doSearch(this.value)"/>
-          <button class="sb-collapse-btn" onclick="toggleSidebar()">◀ Hide</button>
-          <div class="cal-popup" id="cal-popup"></div>
+  <!-- Keep CSS split by responsibility: foundations, app shell, journal surface. -->
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/app.css" />
+  <link rel="stylesheet" href="styles/journal.css" />
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar" aria-label="Entry shelf">
+      <div class="sidebar-header">
+        <button class="round-button" id="hideSidebarBtn" type="button" aria-label="Hide entry shelf">‹</button>
+        <div>
+          <p class="eyebrow">Goose Journal</p>
+          <h1>Entry shelf</h1>
         </div>
-        <div class="sb-entries" id="sb-entries"></div>
       </div>
-    </div>
-    <div class="expand-tab" id="expand-tab" onclick="toggleSidebar()">
-      <svg width="6" height="10" viewBox="0 0 6 10"><polyline points="1,1 5,5 1,9" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
 
-    <div class="editor-area">
-      <div class="page" id="page">
+      <label class="search-box">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="search" placeholder="Search memories…" />
+      </label>
 
-        <!-- Single meta row: date · time · location · weather · mood | [Hide title] -->
-        <div class="meta-row">
-          <div class="meta-chunk">
-            <span class="meta-icon">🗓</span>
-            <input class="meta-input" id="meta-date" style="width:84px;"/>
-          </div>
-          <span class="meta-sep">·</span>
-          <div class="meta-chunk">
-            <span class="meta-icon">⏰</span>
-            <input class="meta-input" id="meta-time" style="width:40px;"/>
-          </div>
-          <span class="meta-sep">·</span>
-          <div class="meta-chunk emoji-field">
-            <button class="emoji-btn" id="loc-btn" onclick="togglePanel('loc-panel',event)">🏠</button>
-            <div class="emoji-panel" id="loc-panel"><div class="emoji-grid" id="loc-grid"></div></div>
-          </div>
-          <span class="meta-sep">·</span>
-          <div class="meta-chunk emoji-field">
-            <button class="emoji-btn" id="weather-btn" onclick="togglePanel('weather-panel',event)">☀️</button>
-            <div class="emoji-panel" id="weather-panel"><div class="emoji-grid" id="weather-grid"></div></div>
-          </div>
-          <span class="meta-sep">·</span>
-          <div class="meta-chunk emoji-field">
-            <button class="emoji-btn" id="mood-btn" onclick="togglePanel('mood-panel',event)">😊</button>
-            <div class="emoji-panel" id="mood-panel"><div class="emoji-grid" id="mood-grid"></div></div>
-          </div>
-          <div style="flex:1;"></div>
-          <button class="title-toggle-btn" id="title-toggle-btn" onclick="toggleTitle()">Hide title</button>
+      <!-- Embedded calendar: intentionally not a floating popup, so it can't drift left. -->
+      <section class="calendar-card" aria-label="Mini calendar">
+        <div class="calendar-header">
+          <button class="tiny-button" id="prevMonthBtn" type="button" aria-label="Previous month">‹</button>
+          <strong id="calendarTitle"></strong>
+          <button class="tiny-button" id="nextMonthBtn" type="button" aria-label="Next month">›</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </section>
+
+      <div class="entry-list" id="entryList"></div>
+    </aside>
+
+    <button class="sidebar-tab" id="showSidebarBtn" type="button" aria-label="Show entry shelf">›</button>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Soft landing</p>
+          <h2>Today’s page</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="soft-button" id="focusBtn" type="button">Focus</button>
+          <button class="soft-button" id="customizeBtn" type="button">Customize</button>
+          <button class="primary-button" id="newEntryBtn" type="button">+ New entry</button>
+        </div>
+      </header>
+
+      <section class="customize-panel" id="customizePanel" hidden>
+        <div class="panel-group">
+          <div class="panel-label">Palette</div>
+          <div class="palette-list" id="paletteList"></div>
         </div>
 
-        <!-- Title: centered, own line -->
-        <div id="title-wrap">
-          <input class="page-title-input" id="page-title" placeholder="Title (optional)…"/>
+        <div class="panel-group">
+          <div class="panel-label">Font</div>
+          <div class="font-list" id="fontList"></div>
         </div>
 
-        <div class="divider"></div>
-        <div contenteditable="true" class="page-body" id="page-body" oninput="updateCount()">Today felt unusually light. I made a cup of coffee and just sat by the window for a while, doing nothing.<br><br>The sunlight came in at just the right angle. A bird kept singing outside — I have no idea what kind, but it sounded nice.<br><br>I tried to think of something, but nothing came. Just silence, and it felt good.</div>
-      </div>
+        <div class="panel-group">
+          <div class="panel-label">Stickers</div>
+          <div class="sticker-picker" id="stickerPicker"></div>
+        </div>
+      </section>
+
+      <section class="page-stage">
+        <article class="journal-page" id="journalPage">
+          <div class="sticker-layer" id="stickerLayer" aria-label="Stickers on page"></div>
+
+          <div class="meta-row">
+            <label class="meta-chip"><span>🗓️</span><input id="dateInput" aria-label="Entry date" /></label>
+            <label class="meta-chip"><span>⏰</span><input id="timeInput" aria-label="Entry time" /></label>
+            <button class="meta-chip emoji-button" id="locationBtn" type="button" aria-label="Location">🏠</button>
+            <button class="meta-chip emoji-button" id="weatherBtn" type="button" aria-label="Weather">🌤️</button>
+            <button class="meta-chip emoji-button" id="moodBtn" type="button" aria-label="Mood">😌</button>
+            <button class="hide-title-button" id="titleToggleBtn" type="button">Hide title</button>
+          </div>
+
+          <div class="emoji-menu" id="emojiMenu" hidden></div>
+
+          <input class="entry-title-input" id="titleInput" placeholder="Title, if today wants one…" />
+          <div class="soft-rule"></div>
+          <div class="entry-body" id="bodyInput" contenteditable="true" spellcheck="true"></div>
+        </article>
+      </section>
+
+      <footer class="statusbar">
+        <span id="wordCount">Words: 0</span>
+        <span id="saveStatus">Saved locally</span>
+      </footer>
+    </main>
+
+    <div class="goose-friend" id="gooseFriend">
+      <div class="goose-bubble" id="gooseBubble">soft landing.</div>
+      <button class="goose-button" id="gooseButton" type="button" aria-label="Ask the goose for encouragement">
+        <img src="assets/goose.svg" alt="" />
+      </button>
     </div>
   </div>
-  <div class="statusbar">
-    <span id="wc">Words: 63</span>
-    <span id="sel-hint" style="font-style:italic;"></span>
-  </div>
-</div>
 
-<script>
-const FONTS=[['Georgia','Georgia, serif'],['Comic Sans MS','"Comic Sans MS", cursive'],['Courier New','"Courier New", monospace'],['Trebuchet MS','"Trebuchet MS", sans-serif'],['Palatino','"Palatino Linotype", serif'],['Arial','Arial, sans-serif'],['Times New Roman','"Times New Roman", serif'],['Verdana','Verdana, sans-serif']];
-const SIZES=[11,12,13,14,15,16,18,20,24];
-const MOODS=['😊','😄','😌','😔','😤','🥱','😭','🤩','😰','😇','🥰','😑'];
-const WEATHERS=['☀️','🌤️','⛅','🌧️','⛈️','❄️','🌫️','🌈','🌸','🍂','🌙','💨'];
-const LOCS=['🏠','🏫','🏢','☕','🏋️','🌳','✈️','🏖️','🏥','🚗','🛒','🍜'];
-const TEXT_COLORS=['#2C2C2A','#185FA5','#3B6D11','#993556','#BA7517','#A32D2D','#0F6E56','#533FB7','#888780','#ffffff','#E24B4A','#1D9E75'];
-const HL_COLORS=['#fefc8a','#f9c0d0','#b5d4f4','#c0dd97','#fac775','#e9d8fd','#fed7aa','#bfdbfe','#a7f3d0','#fecaca','#ddd6fe','#fbcfe8'];
-const BG_COLORS=['#ffffff','#fdf6ec','#eef4fb','#f0f5ec','#fdf0f5','#f5f0ff','#fff8e7','#f0f4f8','#f9f5f0','#e8f4f4','#fafafa','#f8f0e8'];
-const ENTRIES=[
-  {title:"Morning by the window",date:"2025.04.26",time:"09:14",body:'Today felt unusually light. I made a cup of coffee and just sat by the window for a while, doing nothing.<br><br>The sunlight came in at just the right angle. A bird kept singing outside — I have no idea what kind, but it sounded nice.<br><br>I tried to think of something, but nothing came. Just silence, and it felt good.',mood:'😊',weather:'☀️',loc:'🏠'},
-  {title:"Old town stroll",date:"2025.04.22",time:"15:40",body:"Went to the old quarter with some friends. Had stinky tofu — hadn't eaten it in forever. Walked a lot, a bit tired, but honestly in a good mood.",mood:'😄',weather:'🌤️',loc:'🌳'},
-  {title:"Being lazy again",date:"2025.04.19",time:"22:05",body:"Didn't finish the assignment, but I watched a movie. Feeling a little guilty, but the film was so good. I'll catch up tomorrow... probably.",mood:'😅',weather:'☁️',loc:'🏠'},
-  {title:"Petals everywhere",date:"2025.03.30",time:"11:22",body:"Spring is here. The tree downstairs bloomed. Petals all over the sidewalk. Feels soft to walk through, but also a little strange.",mood:'😌',weather:'🌸',loc:'🌳'},
-];
-let curEntry=0,sbOpen=true,titleVisible=true,calYear=2025,calMonth=3,savedRange=null;
-function pad(n){return String(n).padStart(2,'0');}
-function todayStr(){const d=new Date();return d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate());}
-function nowTimeStr(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
-function init(){
-  buildFontList();buildSizeList();buildColorGrids();buildEmojiGrids();
-  renderEntries(ENTRIES);loadEntry(0);buildCalendar();
-  document.addEventListener('mousedown',globalClose);
-  document.getElementById('page-body').addEventListener('mouseup',checkSel);
-  document.getElementById('page-body').addEventListener('keyup',checkSel);
-}
-function buildFontList(){
-  const el=document.getElementById('font-list');
-  FONTS.forEach(([name,stack])=>{
-    const d=document.createElement('div');d.className='font-item'+(name==='Georgia'?' sel':'');
-    d.style.fontFamily=stack;d.textContent=name;d.onclick=()=>applyFont(stack,d);el.appendChild(d);
-  });
-}
-function buildSizeList(){
-  const el=document.getElementById('size-list');
-  SIZES.forEach(s=>{
-    const d=document.createElement('div');d.className='font-item'+(s===14?' sel':'');
-    d.textContent=s+'px';d.style.fontSize=Math.min(s,16)+'px';d.onclick=()=>applySize(s+'px',d);el.appendChild(d);
-  });
-}
-function buildColorGrids(){
-  function grid(id,colors,fn){
-    const el=document.getElementById(id);
-    colors.forEach(c=>{const d=document.createElement('div');d.className='cswatch';d.style.background=c;d.onclick=(e)=>{e.stopPropagation();fn(c,d,id);};el.appendChild(d);});
-  }
-  grid('cg-text',TEXT_COLORS,(c,d,id)=>applyColor('foreColor',c,d,id));
-  grid('cg-hl',HL_COLORS,(c,d,id)=>applyColor('hiliteColor',c,d,id));
-  grid('cg-bg',BG_COLORS,(c,d,id)=>{document.getElementById('page').style.background=c;markSel(id,d);closeAll();});
-}
-function buildEmojiGrids(){
-  function grid(id,arr,btnId){
-    const el=document.getElementById(id);
-    arr.forEach(e=>{const d=document.createElement('div');d.className='emoji-opt';d.textContent=e;d.onclick=()=>{document.getElementById(btnId).textContent=e;closeAll();};el.appendChild(d);});
-  }
-  grid('mood-grid',MOODS,'mood-btn');
-  grid('weather-grid',WEATHERS,'weather-btn');
-  grid('loc-grid',LOCS,'loc-btn');
-}
-function loadEntry(i){
-  curEntry=i;const e=ENTRIES[i];
-  document.getElementById('page-title').value=e.title||'';
-  document.getElementById('page-body').innerHTML=e.body;
-  document.getElementById('meta-date').value=e.date;
-  document.getElementById('meta-time').value=e.time;
-  document.getElementById('mood-btn').textContent=e.mood;
-  document.getElementById('weather-btn').textContent=e.weather;
-  document.getElementById('loc-btn').textContent=e.loc;
-  updateCount();
-  document.querySelectorAll('.entry').forEach((el,j)=>el.classList.toggle('sel',j===i));
-}
-function newEntry(){
-  document.getElementById('page-title').value='';
-  document.getElementById('page-body').innerHTML='';
-  document.getElementById('meta-date').value=todayStr();
-  document.getElementById('meta-time').value=nowTimeStr();
-  document.getElementById('mood-btn').textContent='😊';
-  document.getElementById('weather-btn').textContent='☀️';
-  document.getElementById('loc-btn').textContent='🏠';
-  document.querySelectorAll('.entry').forEach(el=>el.classList.remove('sel'));
-  updateCount();setTimeout(()=>document.getElementById('page-body').focus(),50);
-}
-function renderEntries(list){
-  const el=document.getElementById('sb-entries');el.innerHTML='';
-  if(!list.length){el.innerHTML='<div style="font-size:12px;color:var(--color-text-tertiary);padding:10px 8px;">No entries found.</div>';return;}
-  let lastM='';
-  list.forEach((e,i)=>{
-    const m=e.date.substring(0,7);
-    if(m!==lastM){const lbl=document.createElement('div');lbl.className='sb-lbl';lbl.textContent=m;el.appendChild(lbl);lastM=m;}
-    const d=document.createElement('div');d.className='entry'+(i===curEntry?' sel':'');
-    d.innerHTML='<div class="entry-title">'+(e.title||'(no title)')+'</div><div class="entry-date">'+e.date+'</div>';
-    d.onclick=()=>loadEntry(i);el.appendChild(d);
-  });
-}
-function doSearch(q){
-  if(!q.trim()){renderEntries(ENTRIES);return;}
-  renderEntries(ENTRIES.filter(e=>e.body.toLowerCase().includes(q.toLowerCase())||e.title.toLowerCase().includes(q.toLowerCase())));
-}
-function toggleSidebar(){
-  sbOpen=!sbOpen;
-  document.getElementById('sidebar').classList.toggle('collapsed',!sbOpen);
-  document.getElementById('expand-tab').classList.toggle('visible',!sbOpen);
-}
-function toggleTitle(){
-  titleVisible=!titleVisible;
-  document.getElementById('title-wrap').style.display=titleVisible?'block':'none';
-  document.getElementById('title-toggle-btn').textContent=titleVisible?'Hide title':'Show title';
-}
-function checkSel(){
-  const sel=window.getSelection();const hint=document.getElementById('sel-hint');
-  if(sel&&sel.toString().trim().length>0){hint.textContent='Formatting applies to selection';savedRange=sel.getRangeAt(0).cloneRange();}
-  else{hint.textContent='';savedRange=null;}
-}
-function restoreSel(){
-  const body=document.getElementById('page-body');body.focus();
-  if(savedRange){const s=window.getSelection();s.removeAllRanges();s.addRange(savedRange);return true;}
-  return false;
-}
-function applyFont(stack,el){
-  const hasSel=restoreSel();
-  if(hasSel)document.execCommand('fontName',false,stack);
-  else document.getElementById('page-body').style.fontFamily=stack;
-  document.querySelectorAll('#font-list .font-item').forEach(x=>x.classList.remove('sel'));
-  el.classList.add('sel');closeAll();
-}
-function applySize(size,el){
-  const hasSel=restoreSel();
-  if(hasSel){const sel=window.getSelection();if(sel&&!sel.isCollapsed){const r=sel.getRangeAt(0);const sp=document.createElement('span');sp.style.fontSize=size;try{r.surroundContents(sp);}catch(e){}}}
-  else document.getElementById('page-body').style.fontSize=size;
-  document.querySelectorAll('#size-list .font-item').forEach(x=>x.classList.remove('sel'));
-  el.classList.add('sel');closeAll();
-}
-function applyStyle(s){
-  const hasSel=restoreSel();const item=document.getElementById('sty-'+s);const active=item.classList.toggle('checked');
-  if(hasSel){const cmd={bold:'bold',italic:'italic',underline:'underline',strikethrough:'strikeThrough'}[s];document.execCommand(cmd);}
-  else{const b=document.getElementById('page-body');
-    if(s==='bold')b.style.fontWeight=active?'700':'400';
-    if(s==='italic')b.style.fontStyle=active?'italic':'normal';
-    if(s==='underline')b.style.textDecoration=active?'underline':'none';
-    if(s==='strikethrough')b.style.textDecoration=active?'line-through':'none';}
-}
-function applyColor(cmd,c,el,gridId){
-  const hasSel=restoreSel();
-  if(hasSel)document.execCommand(cmd,false,c);
-  else{if(cmd==='foreColor')document.getElementById('page-body').style.color=c;else document.getElementById('page-body').style.background=c;}
-  markSel(gridId,el);closeAll();
-}
-function markSel(id,el){document.querySelectorAll('#'+id+' .cswatch').forEach(x=>x.classList.remove('sel'));if(el)el.classList.add('sel');}
-function setLineH(v){document.getElementById('page-body').style.lineHeight=v;document.getElementById('lh-val').textContent=parseFloat(v).toFixed(1);}
-function setParaGap(v){document.getElementById('pg-val').textContent=v+'px';}
-function updateCount(){const t=document.getElementById('page-body').innerText||'';document.getElementById('wc').textContent='Words: '+t.trim().split(/\s+/).filter(Boolean).length;}
-function toggleDD(id,e){if(e)e.stopPropagation();const was=document.getElementById(id).classList.contains('open');closeAll();if(!was)document.getElementById(id).classList.add('open');}
-function togglePanel(id,e){if(e)e.stopPropagation();const was=document.getElementById(id).classList.contains('open');closeAll();if(!was)document.getElementById(id).classList.add('open');}
-function closeAll(){document.querySelectorAll('.dropdown,.emoji-panel,.cal-popup').forEach(d=>d.classList.remove('open'));}
-function globalClose(e){if(!e.target.closest('.dropdown')&&!e.target.closest('.tb-btn')&&!e.target.closest('.emoji-panel')&&!e.target.closest('.emoji-btn')&&!e.target.closest('.cal-popup')&&!e.target.closest('.sb-cal-btn'))closeAll();}
-function toggleCal(e){if(e)e.stopPropagation();const p=document.getElementById('cal-popup');const was=p.classList.contains('open');closeAll();if(!was)p.classList.add('open');}
-function buildCalendar(){
-  const popup=document.getElementById('cal-popup');
-  const DOW=['S','M','T','W','T','F','S'],MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const eDates=ENTRIES.map(e=>e.date);
-  const firstDay=new Date(calYear,calMonth,1).getDay(),dim=new Date(calYear,calMonth+1,0).getDate(),today=new Date();
-  let h='<div class="cal-header"><span class="cal-nav" onclick="moveMonth(-1,event)">‹</span>'+MONTHS[calMonth]+' '+calYear+'<span class="cal-nav" onclick="moveMonth(1,event)">›</span></div><div class="cal-grid">';
-  DOW.forEach(d=>h+='<div class="cal-dow">'+d+'</div>');
-  for(let i=0;i<firstDay;i++)h+='<div></div>';
-  for(let d=1;d<=dim;d++){
-    const ds=calYear+'.'+pad(calMonth+1)+'.'+pad(d);
-    let cls='cal-day';
-    if(d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear())cls+=' today';
-    if(eDates.includes(ds))cls+=' has-entry';
-    h+='<div class="'+cls+'" onclick="calPick('+d+',event)">'+d+'</div>';
-  }
-  popup.innerHTML=h+'</div>';
-}
-function moveMonth(dir,e){if(e)e.stopPropagation();calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}buildCalendar();}
-function calPick(d,e){if(e)e.stopPropagation();const ds=calYear+'.'+pad(calMonth+1)+'.'+pad(d);const idx=ENTRIES.findIndex(en=>en.date===ds);if(idx>=0)loadEntry(idx);else{newEntry();document.getElementById('meta-date').value=ds;}closeAll();}
-init();
-</script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
