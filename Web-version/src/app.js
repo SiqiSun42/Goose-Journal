@@ -23,7 +23,11 @@ PATCHES APPLIED:
      rebuild the entry list twice. Removed the redundant second call.
 */
 
+import { askGooseGroq } from "./goose-api.js";
+/* Roll back to teammate static bubble lines: uncomment gooseLines in data.js, swap this file’s data import for the line below, uncomment gooseIndex and the old goose button listener, and drop askGooseGroq / onGooseAsk if unused.
 import { palettes, fonts, stickerPack, emojiMenus, gooseLines, starterEntries } from "./data.js";
+*/
+import { palettes, fonts, stickerPack, emojiMenus, starterEntries } from "./data.js";
 import { loadSavedState, saveState } from "./storage.js";
 import { todayString, nowTimeString, countWordsFromHtml } from "./helpers.js";
 import { renderCalendar } from "./calendar.js";
@@ -71,7 +75,8 @@ const els = {
   wordCount: $("#wordCount"),
   saveStatus: $("#saveStatus"),
   gooseButton: $("#gooseButton"),
-  gooseBubble: $("#gooseBubble")
+  gooseBubble: $("#gooseBubble"),
+  groqModelInput: $("#groqModelInput")
 };
 
 const saved = loadSavedState();
@@ -87,7 +92,11 @@ let state = saved || {
   calendarMonth: now.getMonth()
 };
 
+const LS_GROQ_MODEL = "goose-journal-groq-model";
+
+/*
 let gooseIndex = 0;
+*/
 
 init();
 
@@ -98,6 +107,22 @@ function init() {
   if (window.innerWidth <= 850) {
     els.app.classList.add("sidebar-hidden");
   }
+
+  try {
+    els.groqModelInput.value =
+      localStorage.getItem(LS_GROQ_MODEL) ||
+      import.meta.env.VITE_GROQ_MODEL ||
+      "llama-3.1-8b-instant";
+  } catch {
+    els.groqModelInput.value =
+      import.meta.env.VITE_GROQ_MODEL || "llama-3.1-8b-instant";
+  }
+
+  els.groqModelInput.addEventListener("input", () => {
+    try {
+      localStorage.setItem(LS_GROQ_MODEL, els.groqModelInput.value);
+    } catch {}
+  });
 
   wireEvents();
   renderAll();
@@ -152,10 +177,59 @@ function init() {
     }
   });
 
+    /*
     els.gooseButton.addEventListener("click", () => {
       gooseIndex = (gooseIndex + 1) % gooseLines.length;
       els.gooseBubble.textContent = gooseLines[gooseIndex];
     });
+    */
+
+    els.gooseButton.addEventListener("click", () => {
+      void onGooseAsk();
+    });
+  }
+
+  async function onGooseAsk() {
+    const entry = getActiveEntry();
+    if (!entry) return;
+
+    const bodyText = (els.bodyInput.innerText || "").trim();
+    const titleText = (entry.title || "").trim();
+    if (!bodyText && !titleText) {
+      els.gooseBubble.textContent = "Write something on the page first.";
+      return;
+    }
+
+    const prompt = buildDiaryPrompt(entry, els.bodyInput);
+
+    els.gooseButton.disabled = true;
+    els.gooseBubble.textContent = "Honking…";
+
+    try {
+      const reply = await askGooseGroq(prompt, els.groqModelInput.value);
+      els.gooseBubble.textContent = reply;
+    } catch (e) {
+      const msg =
+        e instanceof Error && e.message && e.message.length < 280
+          ? e.message
+          : "Something went wrong.";
+      els.gooseBubble.textContent = msg;
+    } finally {
+      els.gooseButton.disabled = false;
+    }
+  }
+
+  function buildDiaryPrompt(entry, bodyEl) {
+    const title = (entry.title || "").trim();
+    const bodyText = (bodyEl.innerText || "").trim();
+    const tags = [entry.location, entry.weather, entry.mood]
+      .filter(Boolean)
+      .join(" ");
+    const lines = [];
+    if (title) lines.push(`Title: ${title}`);
+    if (tags) lines.push(`Tags: ${tags}`);
+    lines.push(bodyText || "(empty page)");
+    return lines.join("\n");
   }
 
   function renderAll() {

@@ -95,6 +95,7 @@ export const emojiMenus = {
   mood: ["😊", "😌", "🥰", "😐", "😔", "😤", "🥱", "🤩"]
 };
 
+/*
 export const gooseLines = [
   "soft landing.",
   "one sentence counts.",
@@ -103,6 +104,7 @@ export const gooseLines = [
   "fresh page energy.",
   "honking quietly."
 ];
+*/
 
 export const starterEntries = [
   {
