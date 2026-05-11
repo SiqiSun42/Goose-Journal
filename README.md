@@ -3,7 +3,7 @@
 A soft pastel journal prototype with a simple modular codebase. No React, no build step, no bundler. Just browser-native ES modules.
 
 ## What changed in this version
-- MobileUI
+- MobileUI for iPad
 - Calmer, softer UI with lighter animation.
 - Calendar is embedded in the sidebar, not a floating popup, so it does not drift into the top-left corner.
 - No stickers appear by default. Stickers only appear when selected from the Customize panel.
