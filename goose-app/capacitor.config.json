@@ -1,0 +1,14 @@
+{
+  "appId": "com.goose.journal",
+  "appName": "Goose",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": true
+    }
+  },
+  "server": {
+  "url": "http://YOURIP:5173",
+  "cleartext": true
+  }
+}
