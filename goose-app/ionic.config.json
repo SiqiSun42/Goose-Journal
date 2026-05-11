@@ -1,7 +1,0 @@
-{
-  "name": "Goose App",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "react"
-}
