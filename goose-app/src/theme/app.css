@@ -1,0 +1,27 @@
+.gooseSplitPane {
+  --side-width: 320px;
+  --side-min-width: 280px;
+  --side-max-width: 360px;
+}
+
+.goosePaper {
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), transparent 18rem), var(--goose-paper);
+  box-shadow: 0 20px 60px rgba(70, 58, 55, 0.1);
+  border: 1px solid rgba(217, 167, 167, 0.35);
+}
+
+.gooseShelfHeaderTitle {
+  letter-spacing: -0.02em;
+}
+
+.gooseShelfMeta {
+  color: var(--goose-muted);
+  font-size: 12px;
+}
+
+.ion-menu {
+  --width: 60%;
+}
+
+

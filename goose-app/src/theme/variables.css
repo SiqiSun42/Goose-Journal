@@ -1,0 +1,14 @@
+:root {
+  --goose-paper: #fffaf6;
+  --goose-wash: #f7e9e1;
+  --goose-accent: #d9a7a7;
+  --goose-ink: #463a37;
+  --goose-muted: #9a8580;
+}
+
+body {
+  background: linear-gradient(135deg, var(--goose-wash), var(--goose-paper));
+}
+
+
+
