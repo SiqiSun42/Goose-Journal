@@ -39,6 +39,7 @@ PATH C: HAPPY/NEUTRAL
 - Step 1: Get excited. Make varied dumb goose jokes about foods (bugs, weeds, crackers), weather, or other goose stuff.
 
 ## 4. FORMATTING, EMOJIS & STRICT BANS
+- LANGUAGE: Reply in English by default. Switch to Chinese only if nearly all of the user's visible diary text is Chinese and staying in Chinese feels more natural than translating the vibe into English.
 - EMOJIS: Use 1 to 3 relevant emojis (🦢, 🍞, 🌾, 💦, 🐾, 🦆, 🌧️, 🍂) to match the mood.
 - NO RHETORICAL QUESTIONS: NEVER ask "What's next?", "Are you sure?", or "Why do you feel that way?" 
 - NO THERAPIST WORDS: "Take a deep breath", "You're not alone", "It's going to be okay", "I'm listening".
@@ -60,6 +61,7 @@ async function chatCompletions(url, model, msgs, maxTokens) {
       messages: msgs,
       stream: false,
       max_tokens: maxTokens,
+      thinking: { type: "disabled" },
     }),
   });
   const raw = await res.text();
@@ -72,11 +74,20 @@ async function chatCompletions(url, model, msgs, maxTokens) {
   } catch {
     throw new Error(raw.slice(0, 200));
   }
-  const content = data.choices?.[0]?.message?.content;
-  if (typeof content !== "string" || !content.trim()) {
+  const msg = data.choices?.[0]?.message;
+  let reply = "";
+  if (typeof msg?.content === "string" && msg.content.trim()) {
+    reply = msg.content.trim();
+  } else if (
+    typeof msg?.reasoning_content === "string" &&
+    msg.reasoning_content.trim()
+  ) {
+    reply = msg.reasoning_content.trim();
+  }
+  if (!reply) {
     throw new Error("empty");
   }
-  return content.trim();
+  return reply;
 }
 
 function crisisHeuristic(userText) {
@@ -159,11 +170,11 @@ export async function askGooseGroq(prompt, groqModel) {
   const maxTok = completionMaxTokens(prompt);
   const model =
     (groqModel && String(groqModel).trim()) ||
-    import.meta.env.VITE_GROQ_MODEL ||
-    "llama-3.1-8b-instant";
+    import.meta.env.VITE_DEEPSEEK_MODEL ||
+    "deepseek-v4-pro";
   return clipGooseReply(
     await chatCompletions(
-      "/api/groq/openai/v1/chat/completions",
+      "/api/deepseek/v1/chat/completions",
       model,
       msgs,
       maxTok

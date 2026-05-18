@@ -76,7 +76,7 @@ const els = {
   saveStatus: $("#saveStatus"),
   gooseButton: $("#gooseButton"),
   gooseBubble: $("#gooseBubble"),
-  groqModelInput: $("#groqModelInput")
+  deepseekModelInput: $("#deepseekModelInput")
 };
 
 const saved = loadSavedState();
@@ -92,7 +92,7 @@ let state = saved || {
   calendarMonth: now.getMonth()
 };
 
-const LS_GROQ_MODEL = "goose-journal-groq-model";
+const LS_DEEPSEEK_MODEL = "goose-journal-deepseek-model";
 
 /*
 let gooseIndex = 0;
@@ -109,18 +109,18 @@ function init() {
   }
 
   try {
-    els.groqModelInput.value =
-      localStorage.getItem(LS_GROQ_MODEL) ||
-      import.meta.env.VITE_GROQ_MODEL ||
-      "llama-3.1-8b-instant";
+    els.deepseekModelInput.value =
+      localStorage.getItem(LS_DEEPSEEK_MODEL) ||
+      import.meta.env.VITE_DEEPSEEK_MODEL ||
+      "deepseek-v4-pro";
   } catch {
-    els.groqModelInput.value =
-      import.meta.env.VITE_GROQ_MODEL || "llama-3.1-8b-instant";
+    els.deepseekModelInput.value =
+      import.meta.env.VITE_DEEPSEEK_MODEL || "deepseek-v4-pro";
   }
 
-  els.groqModelInput.addEventListener("input", () => {
+  els.deepseekModelInput.addEventListener("input", () => {
     try {
-      localStorage.setItem(LS_GROQ_MODEL, els.groqModelInput.value);
+      localStorage.setItem(LS_DEEPSEEK_MODEL, els.deepseekModelInput.value);
     } catch {}
   });
 
@@ -206,7 +206,7 @@ function init() {
     els.gooseBubble.textContent = "Honking…";
 
     try {
-      const reply = await askGooseGroq(prompt, els.groqModelInput.value);
+      const reply = await askGooseGroq(prompt, els.deepseekModelInput.value);
       els.gooseBubble.textContent = reply;
     } catch (e) {
       const msg =
